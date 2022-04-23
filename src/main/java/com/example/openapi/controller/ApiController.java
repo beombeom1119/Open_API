@@ -43,7 +43,6 @@ public class ApiController {
             result.append(returnLine + "\n\r");
         }
 
-
         urlConnection.disconnect();
         JSONParser parser = new JSONParser();
         Object obj = parser.parse(result.toString());
@@ -51,85 +50,71 @@ public class ApiController {
     }
 
 
-    @GetMapping("/papa")
-    public String hel() {
-        String clientId = "asd";//애플리케이션 클라이언트 아이디값";
-        String clientSecret = "asd";//애플리케이션 클라이언트 시크릿값";
+    @GetMapping("/real")
+        public Object real() {
+
+        // 인증키 (개인이 받아와야함)
+        String key = "2911a3c9703528caac2b24c313aec593";
+
+        // 파싱한 데이터를 저장할 변수
+        String result = "";
+
         try {
-            String text = URLEncoder.encode("안녕하세요. 오늘 기분은 어떻습니까?", "UTF-8");
-            String apiURL = "https://openapi.naver.com/v1/papago/n2mt";
-            URL url = new URL(apiURL);
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("X-Naver-Client-Id", clientId);
-            con.setRequestProperty("X-Naver-Client-Secret", clientSecret);
-            // post request
-            String postParams = "source=ko&target=en&text=" + text;
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(postParams);
-            wr.flush();
-            wr.close();
-            int responseCode = con.getResponseCode();
-            BufferedReader br;
-            if(responseCode==200) { // 정상 호출
-                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            } else {  // 에러 발생
-                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            }
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = br.readLine()) != null) {
-                response.append(inputLine);
-            }
-            br.close();
-            return response.toString();
-        } catch (Exception e) {
-            return "";
-        }
 
-    }
+            URL url = new URL("http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key="
+                    + key + "&movieCd=20124039");
 
+            BufferedReader bf;
 
-    @GetMapping("real")
-    public Object real() throws Exception
-    {
+            bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+
+            result = bf.readLine();
+
             JSONParser jsonParser = new JSONParser();
-            JSONObject jsonObject = (JSONObject)jsonParser.parse(readUrl());
-            JSONObject json = (JSONObject)jsonObject.get("SchulInfoHgschl");
-            JSONArray array = (JSONArray)json.get("row");
-            for(int i=0; i<array.size(); i++){
-                JSONObject row = (JSONObject)array.get(i);
-                String school = (String)row.get("SCHUL_NM");
-                System.out.println(school);
-            }
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+            JSONObject movieInfoResult = (JSONObject) jsonObject.get("movieInfoResult");
+            JSONObject movieInfo = (JSONObject) movieInfoResult.get("movieInfo");
+
+            JSONArray directors = (JSONArray) movieInfo.get("directors");
+            JSONObject directors_peopleNm = (JSONObject) directors.get(0);
+
+            String jsonResult = "[{\n\"영화명(한글)\" : " + "\"" + movieInfo.get("movieNm") + "\",\n" + "\"개봉일\" : " + movieInfo.get("openDt") + ",\n" + "\"감독이름\": " + "\"" + directors_peopleNm.get("peopleNm") + "\"" + "\n}]";
+
+            JSONParser parser = new JSONParser();
+            Object obj = parser.parse(jsonResult);
+
+            return obj;
+//                System.out.println("[{");
+//                System.out.println(" \"영화명(한글)\" : "+ "\"" +movieInfo.get("movieNm")+"\",");
+//                System.out.println("\"개봉일\" : "+movieInfo.get("openDt")+",");
+//                System.out.println("\"감독이름\": "+"\""+directors_peopleNm.get("peopleNm")+"\"");
+//                System.out.println("}]");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "[]";
         }
 
-        private static String readUrl() throws Exception{
-            BufferedInputStream reader = null;
-
-            try {
-                URL url = new URL("http://openapi.seoul.go.kr:8088/"
-                        + key+"/json/SchulInfoHgschl/1/20/");
-
-                reader = new BufferedInputStream(url.openStream());
-                StringBuffer buffer = new StringBuffer();
-                int i = 0;
-                byte[] b = new byte[4096];
-                while((i = reader.read(b)) != -1){
-                    buffer.append(new String(b, 0, i));
-                }
-                return buffer.toString();
-
-            } finally{
-                if(reader != null) reader.close();
-
-            }
-
         }
-    }
 
-    }
+
+        @GetMapping("/jsontest")
+    public String json()
+        {
+            String json1= "[{\n" +
+                    " \"영화명(한글)\" : \"타워\",\n" +
+                    "\"개봉일\" : 20121225,\n" +
+                    "\"감독이름\": \"김지훈\"\n" +
+                    "}]";
+
+            return json1;
+        }
 
 }
+
+
+
+
+
+
+
 
