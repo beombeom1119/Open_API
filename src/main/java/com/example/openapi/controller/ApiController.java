@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 
 @RestController
 public class ApiController {
@@ -51,7 +52,118 @@ public class ApiController {
 
 
     @GetMapping("/real")
-        public Object real() {
+    public Object real() {
+
+        // 인증키 (개인이 받아와야함)
+        String key = "2911a3c9703528caac2b24c313aec593";
+
+        // 파싱한 데이터를 저장할 변수
+        String result = "";
+
+        try {
+
+
+            URL url = new URL("http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key="
+                    + key + "&movieCd=20124039");
+            BufferedReader bf;
+            bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+            result = bf.readLine();
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+            JSONObject movieInfoResult = (JSONObject) jsonObject.get("movieInfoResult");
+            JSONObject movieInfo = (JSONObject) movieInfoResult.get("movieInfo");
+            JSONArray directors = (JSONArray) movieInfo.get("directors");
+            JSONObject directors_peopleNm = (JSONObject) directors.get(0);
+            String jsonResult = "[{\n\"영화명(한글)\" : " + "\"" + movieInfo.get("movieNm") + "\",\n" + "\"개봉일\" : "
+                    + movieInfo.get("openDt") + ",\n" + "\"감독이름\": " + "\"" + directors_peopleNm.get("peopleNm") + "\"" + "\n}]";
+
+            JSONParser parser = new JSONParser();
+            Object obj = parser.parse(jsonResult);
+
+            return obj;
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "[]";
+        }
+
+    }
+
+
+    @GetMapping("/json")
+    public Object json() {
+
+        // 인증키 (개인이 받아와야함)
+        String key = "2911a3c9703528caac2b24c313aec593";
+
+        // 파싱한 데이터를 저장할 변수
+        String result = "";
+
+        try {
+
+
+            URL url = new URL("http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key="
+                    + key + "&movieCd=20124039");
+
+            BufferedReader bf;
+
+            bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+
+            result = bf.readLine();
+
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+            JSONObject movieInfoResult = (JSONObject) jsonObject.get("movieInfoResult");
+            JSONObject movieInfo = (JSONObject) movieInfoResult.get("movieInfo");
+            JSONArray actors = (JSONArray) movieInfo.get("actors");
+            return actors;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "[]";
+        }
+
+
+    }
+
+
+    @GetMapping("/example")
+    public Object example() {
+
+        // 인증키 (개인이 받아와야함)
+        String key = "2911a3c9703528caac2b24c313aec593";
+
+        // 파싱한 데이터를 저장할 변수
+        String result = "";
+
+        try {
+
+
+            URL url = new URL("http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key="
+                    + key + "&movieCd=20124039");
+
+            BufferedReader bf;
+
+            bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+
+            result = bf.readLine();
+
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+            return jsonObject;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "[]";
+        }
+
+
+    }
+
+
+    @GetMapping("/map")
+    public Object map() {
 
         // 인증키 (개인이 받아와야함)
         String key = "2911a3c9703528caac2b24c313aec593";
@@ -69,45 +181,47 @@ public class ApiController {
             bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
 
             result = bf.readLine();
-
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
             JSONObject movieInfoResult = (JSONObject) jsonObject.get("movieInfoResult");
-            JSONObject movieInfo = (JSONObject) movieInfoResult.get("movieInfo");
+            JSONObject movieInfo = (JSONObject)movieInfoResult.get("movieInfo");
+            JSONArray actors = (JSONArray)movieInfo.get("actors");
 
-            JSONArray directors = (JSONArray) movieInfo.get("directors");
-            JSONObject directors_peopleNm = (JSONObject) directors.get(0);
+            JSONArray jsonArray = new JSONArray();
 
-            String jsonResult = "[{\n\"영화명(한글)\" : " + "\"" + movieInfo.get("movieNm") + "\",\n" + "\"개봉일\" : " + movieInfo.get("openDt") + ",\n" + "\"감독이름\": " + "\"" + directors_peopleNm.get("peopleNm") + "\"" + "\n}]";
 
-            JSONParser parser = new JSONParser();
-            Object obj = parser.parse(jsonResult);
+            for (int i=0; i< actors.size(); i++)
+            {
+                HashMap<String, String> hashMap = new HashMap();
+                JSONObject target = (JSONObject) actors.get(i);
+                hashMap.put("peopleNm", (String) target.get("peopleNm"));
+                hashMap.put("peopleNmEn",(String) target.get("peopleNmEn"));
+                jsonArray.add(hashMap);
+            }
 
-            return obj;
-//                System.out.println("[{");
-//                System.out.println(" \"영화명(한글)\" : "+ "\"" +movieInfo.get("movieNm")+"\",");
-//                System.out.println("\"개봉일\" : "+movieInfo.get("openDt")+",");
-//                System.out.println("\"감독이름\": "+"\""+directors_peopleNm.get("peopleNm")+"\"");
-//                System.out.println("}]");
+            return jsonArray;
+
+//
+
+
+
+
+
+
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
-            return "[]";
+            return "[뭔가 오류]";
         }
 
-        }
 
 
-        @GetMapping("/jsontest")
-    public String json()
-        {
-            String json1= "[{\n" +
-                    " \"영화명(한글)\" : \"타워\",\n" +
-                    "\"개봉일\" : 20121225,\n" +
-                    "\"감독이름\": \"김지훈\"\n" +
-                    "}]";
 
-            return json1;
-        }
+
+    }
+
 
 }
 
