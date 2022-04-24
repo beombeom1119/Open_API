@@ -131,28 +131,17 @@ public class ApiController {
     @GetMapping("/example")
     public Object example() {
 
-        // 인증키 (개인이 받아와야함)
-        String key = "2911a3c9703528caac2b24c313aec593";
-
         // 파싱한 데이터를 저장할 변수
         String result = "";
 
         try {
-
-
-            URL url = new URL("http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key="
-                    + key + "&movieCd=20124039");
-
+            URL url = new URL("https://api.covid19api.com/total/dayone/country/kr");
             BufferedReader bf;
-
             bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
-
             result = bf.readLine();
-
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
             return jsonObject;
-
         } catch (Exception e) {
             e.printStackTrace();
             return "[]";
@@ -184,18 +173,17 @@ public class ApiController {
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
             JSONObject movieInfoResult = (JSONObject) jsonObject.get("movieInfoResult");
-            JSONObject movieInfo = (JSONObject)movieInfoResult.get("movieInfo");
-            JSONArray actors = (JSONArray)movieInfo.get("actors");
+            JSONObject movieInfo = (JSONObject) movieInfoResult.get("movieInfo");
+            JSONArray actors = (JSONArray) movieInfo.get("actors");
 
             JSONArray jsonArray = new JSONArray();
 
 
-            for (int i=0; i< actors.size(); i++)
-            {
+            for (int i = 0; i < actors.size(); i++) {
                 HashMap<String, String> hashMap = new HashMap();
                 JSONObject target = (JSONObject) actors.get(i);
                 hashMap.put("peopleNm", (String) target.get("peopleNm"));
-                hashMap.put("peopleNmEn",(String) target.get("peopleNmEn"));
+                hashMap.put("peopleNmEn", (String) target.get("peopleNmEn"));
                 jsonArray.add(hashMap);
             }
 
@@ -204,25 +192,47 @@ public class ApiController {
 //
 
 
-
-
-
-
-
-
-
         } catch (Exception e) {
             e.printStackTrace();
             return "[뭔가 오류]";
         }
 
 
-
-
-
     }
 
 
+    @GetMapping("/map1")
+    public Object corona() {
+
+
+        String result = "";
+
+        try {
+
+            URL url = new URL("https://api.covid19api.com/total/dayone/country/kr");
+
+            BufferedReader bf;
+            bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+            result = bf.readLine();
+            JSONParser jsonParser = new JSONParser();
+            JSONArray coronaArray = (JSONArray) jsonParser.parse(result);
+            JSONArray jsonArray = new JSONArray();
+
+            for (int i = 0; i < coronaArray.size(); i++) {
+                HashMap hashMap = new HashMap();
+                JSONObject target = (JSONObject) coronaArray.get(i);
+                hashMap.put("Country", target.get("Country"));
+                hashMap.put("Active", target.get("Active"));
+                hashMap.put("Confirmed", target.get("Confirmed"));
+                jsonArray.add(hashMap);
+            }
+            return jsonArray;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "[뭔가 오류]";
+        }
+    }
 }
 
 
