@@ -219,11 +219,11 @@ public class ApiController {
             JSONArray jsonArray = new JSONArray();
 
             for (int i = 0; i < coronaArray.size(); i++) {
-                HashMap hashMap = new HashMap();
+                HashMap hashMap = new HashMap();                     // <,> 없이 HASH MAP 생성
                 JSONObject target = (JSONObject) coronaArray.get(i);
-                hashMap.put("Country", target.get("Country"));
-                hashMap.put("Active", target.get("Active"));
-                hashMap.put("Confirmed", target.get("Confirmed"));
+                hashMap.put("Country", target.get("Country"));      //Country 뽑아내기
+                hashMap.put("Active", target.get("Active"));        //Active 뽑아내기
+                hashMap.put("Confirmed", target.get("Confirmed"));  //Confirmed 뽑아내기
                 jsonArray.add(hashMap);
             }
             return jsonArray;
